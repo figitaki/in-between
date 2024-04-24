@@ -1,6 +1,7 @@
 from enum import Enum, unique
 from typing import List, Tuple, Optional
 from random import shuffle
+import math
 
 NUM_CARDS = 13
 
@@ -66,6 +67,10 @@ class Strategy(Enum):
     MINIMUM = 1
     AGGRESSIVE = 2
     USER = 3
+    SCALE = 4
+    SMART_LIN = 5
+    SMART_EXP = 6
+    ALWAYS_BET = 7
 
 
 class Player:
@@ -82,19 +87,60 @@ class Player:
     def decide_ace_high(self, hand: Hand):
         return False
 
-    def decide_bet(self, hand, pot):
+    def decide_bet(self, hand, pot, deck: List[Card]):
         # TODO: be smarter, for now just bet if spread is greater than 6
         spread = calculate_spread(hand)
         # print(f"spread: {spread}, pot: ${pot}, purse: ${self.purse}")
+        user_max_bet = min(pot, self.purse)
         match self.strategy:
+            case Strategy.ALWAYS_BET:
+                return 1
             case Strategy.MINIMUM:
                 if spread > 6:
                     return 1
             case Strategy.AGGRESSIVE:
                 if spread > 9:
-                    return min(pot, self.purse)
+                    return user_max_bet
                 if spread > 6:
                     return min(pot, self.purse // 2)
+            case Strategy.SCALE:
+                return user_max_bet * (spread // 14) if spread > 6 else 0
+            case Strategy.SMART_LIN:
+                outcomes = 0
+                low = min(hand[0].value())
+                high = max(hand[1].value())
+                for card in deck:
+                    if card.value() == low or card.value() == high:
+                        outcomes -= 2
+                    if card.value() > low and card.value() < high:
+                        outcomes += 1
+                    else:
+                        outcomes -= 1
+                # range is [-2, 1]
+                normalizedOutcome = outcomes / len(deck)
+                return (
+                    math.floor(user_max_bet * normalizedOutcome)
+                    if normalizedOutcome > 0
+                    else 0
+                )
+            case Strategy.SMART_EXP:
+                outcomes = 0
+                low = min(hand[0].value())
+                high = max(hand[1].value())
+                for card in deck:
+                    if card.value() == low or card.value() == high:
+                        outcomes -= 2
+                    if card.value() > low and card.value() < high:
+                        outcomes += 1
+                    else:
+                        outcomes -= 1
+                # range is [-2, 1]
+                normalizedOutcomeExp = (outcomes / len(deck)) ** 0.5
+                return (
+                    math.floor(user_max_bet * normalizedOutcomeExp)
+                    if normalizedOutcomeExp > 0
+                    else 0
+                )
             case Strategy.USER:
                 bet = input("Enter bet amount: ")
                 if bet == "":
@@ -225,7 +271,7 @@ class Game:
             return
 
         hand = (hand[0], card_two)
-        bet = player.decide_bet(hand, self.pot)
+        bet = player.decide_bet(hand, self.pot, self.deck)
         if bet is not None:
             in_between = deal_card()
             if in_between is None:
