@@ -2,6 +2,7 @@ from enum import Enum, unique
 from typing import List, Tuple, Optional
 from random import shuffle
 import math
+import random
 
 NUM_CARDS = 13
 
@@ -70,6 +71,19 @@ def calculate_spread(hand: Hand):
         return hand[1].value() - hand[0].value()
 
 
+def create_random_array(n, m):
+    # Step 1: Create a list of n zeros
+    arr = [0] * n
+    # Step 2: Randomly choose m unique positions to set to 1
+    # Note: random.sample is used to select m unique positions without replacement
+    positions = random.sample(range(n), m)
+
+    # Set chosen positions to 1
+    for pos in positions:
+        arr[pos] = 1
+    return arr
+
+
 class Strategy(Enum):
     MINIMUM = 1
     AGGRESSIVE = 2
@@ -123,6 +137,9 @@ class Player:
                 low: int = min(hand[0].value(), hand[1].value())
                 high: int = max(hand[1].value(), hand[0].value())
                 for card in deck:
+                    if card.rank == Rank.JOKER:
+                        # because jokers are only min_bet we can ignore
+                        continue
                     if card.value() == low or card.value() == high:
                         outcomes -= 2
                     if card.value() > low and card.value() < high:
@@ -140,6 +157,9 @@ class Player:
                 low: int = min(hand[0].value(), hand[1].value())
                 high: int = max(hand[1].value(), hand[0].value())
                 for card in deck:
+                    if card.rank == Rank.JOKER:
+                        # because jokers are only min_bet we can ignore
+                        continue
                     if card.value() == low or card.value() == high:
                         outcomes -= 2
                     if card.value() > low and card.value() < high:
@@ -241,6 +261,13 @@ class Game:
 
     def check_endgame(self):
         if self.pot == 0:
+            return True
+        if self.pot > 100:
+            split = self.pot // len(self.players)
+            remainder = self.pot % len(self.players)
+            random = create_random_array(len(self.players), remainder)
+            for i, player in enumerate(self.players):
+                self.transfer(player, split + random[i])
             return True
         else:
             return False
