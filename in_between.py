@@ -33,7 +33,7 @@ class Rank(Enum):
 class Card:
     rank: Rank
     suit: Suit
-    ace_high: bool
+    ace_high: Optional[bool]
 
     def __init__(self, rank: Rank, suit: Suit):
         self.rank = rank
@@ -43,14 +43,19 @@ class Card:
     def __repr__(self):
         return f"{self.rank.name} of {self.suit.name} {'(high)' if self.rank == Rank.ACE and self.ace_high else ''}"
 
-    def value(self):
+    def value(self) -> int:
         if self.rank == Rank.ACE and self.ace_high:
             return 14
         else:
             return self.rank.value
 
 
-def calculate_spread(hand: Tuple[Card, Card]):
+Hand = Tuple[Card | None, Card | None]
+
+
+def calculate_spread(hand: Hand):
+    if hand[0] is None or hand[1] is None:
+        return 0
     if hand[0].value() > hand[1].value():
         return hand[0].value() - hand[1].value()
     else:
@@ -74,7 +79,7 @@ class Player:
     def __repr__(self) -> str:
         return f" Purse: ${self.purse}"
 
-    def decide_ace_high(self, hand: Tuple[Card, Card]):
+    def decide_ace_high(self, hand: Hand):
         return False
 
     def decide_bet(self, hand, pot):
@@ -130,8 +135,7 @@ class Game:
     def __init__(self, num_players: int = 4):
         self.round = 0
         self.players = [
-            Player(100, Strategy.AGGRESSIVE if index %
-                   2 == 0 else Strategy.MINIMUM)
+            Player(100, Strategy.AGGRESSIVE if index % 2 == 0 else Strategy.MINIMUM)
             for index in range(num_players)
         ]
         self.min_bet = 1
@@ -153,8 +157,7 @@ class Game:
             self.update()
 
     def shuffle_deck(self):
-        self.deck = [Card(rank, suit)
-                     for suit in self.suits for rank in self.ranks]
+        self.deck = [Card(rank, suit) for suit in self.suits for rank in self.ranks]
         self.deck.append(Card(Rank.JOKER, Suit.SPADES))
         self.deck.append(Card(Rank.JOKER, Suit.DIAMONDS))
         shuffle(self.deck)
@@ -228,12 +231,12 @@ class Game:
             if in_between is None:
                 return
 
-            low = min(hand[0].value(), hand[1].value())
-            high = max(hand[0].value(), hand[1].value())
-            in_between_val = in_between.value()
+            low: int = min(hand[0].value(), hand[1].value())
+            high: int = max(hand[0].value(), hand[1].value())
+            in_between_val: int = in_between.value()
             if in_between_val == low or in_between_val == high:
                 self.transfer(player, -2 * bet)
-            elif in_between.value() > low and in_between.value() < high:
+            elif in_between_val > low and in_between_val < high:
                 self.transfer(player, bet)
             else:
                 self.transfer(player, -bet)
