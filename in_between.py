@@ -33,7 +33,7 @@ class Rank(Enum):
 class Card:
     rank: Rank
     suit: Suit
-    ace_high: Optional[bool]
+    ace_high: bool
 
     def __init__(self, rank: Rank, suit: Suit):
         self.rank = rank
@@ -115,7 +115,6 @@ class Game:
     ]
     deck: List[Card]
     min_bet: int
-    hand: (Optional[Card], Optional[Card])
     pot: int
 
     def __init__(self, num_players: int = 4):
@@ -176,8 +175,8 @@ class Game:
         player.purse += amount
         self.pot -= amount
 
-    def take_turn(self, player: Player):
-        self.hand = (None, None)
+    def take_turn(self, player: Player, first_card: Optional[Card] = None):
+        hand = (first_card, None)
         in_between = None
 
         def deal_card():
@@ -190,6 +189,10 @@ class Game:
                 # player loses automatically, pays min_bet
                 self.transfer(player, -self.min_bet)
                 return
+            if card.rank == hand[0].rank:
+                self.take_turn(player, card)
+                card = deal_card()
+                return card
             elif card.rank == Rank.ACE:
                 card.ace_high = player.decide_ace_high(self.hand)
             return card
@@ -199,22 +202,22 @@ class Game:
         if card is None:
             return
 
-        self.hand = (card, None)
+        hand = (card, None)
 
         # deal second card
         card_two = deal_card()
         if card_two is None:
             return
 
-        self.hand = (self.hand[0], card_two)
+        hand = (hand[0], card_two)
         bet = player.decide_bet(self.hand, self.pot)
         if bet is not None:
             in_between = deal_card()
             if in_between is None:
                 return
 
-            low = min(self.hand[0].value(), self.hand[1].value())
-            high = max(self.hand[0].value(), self.hand[1].value())
+            low = min(hand[0].value(), hand[1].value())
+            high = max(hand[0].value(), hand[1].value())
             if in_between.value() > low and in_between.value() < high:
                 # print(f"Player #{self.turn % len(self.players)} wins ${bet}!")
                 self.transfer(player, bet)
