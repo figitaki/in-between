@@ -145,7 +145,6 @@ class Game:
             Round  # : {self.round}
             Turn: {self.turn}
             Players: {self.players}
-            Hand: {self.hand}
             Remaining Cards: {self.deck.__len__()}
             Min Bet: {self.min_bet}"""
 
@@ -197,12 +196,12 @@ class Game:
                 # print("Deck is empty! Shuffling...")
                 self.shuffle_deck()
             card = self.deck.pop()
-            # print(f"Dealt: {card}")
+            print(f"Dealt: {card}")
             if card.rank == Rank.JOKER:
                 # player loses automatically, pays min_bet
                 self.transfer(player, -self.min_bet)
                 return
-            if card.rank == hand[0].rank:
+            if hand[0] and card.rank == hand[0].rank:
                 self.take_turn(player, card)
                 card = deal_card()
                 return card
@@ -223,7 +222,7 @@ class Game:
             return
 
         hand = (hand[0], card_two)
-        bet = player.decide_bet(self.hand, self.pot)
+        bet = player.decide_bet(hand, self.pot)
         if bet is not None:
             in_between = deal_card()
             if in_between is None:
