@@ -147,7 +147,8 @@ class Player:
                     else:
                         outcomes -= 1
                 # range is [-2, 1]
-                normalizedOutcome = outcomes / len(deck) if len(deck) > 0 else 0
+                normalizedOutcome = outcomes / \
+                    len(deck) if len(deck) > 0 else 0
                 bet = math.floor(
                     user_max_bet * normalizedOutcome if normalizedOutcome > 0 else 0
                 )
@@ -167,7 +168,8 @@ class Player:
                     else:
                         outcomes -= 1
                 # range is [-2, 1]
-                normalizedOutcome = outcomes / len(deck) if len(deck) > 0 else 0
+                normalizedOutcome = outcomes / \
+                    len(deck) if len(deck) > 0 else 0
                 bet = math.floor(
                     user_max_bet * (normalizedOutcome**0.5)
                     if normalizedOutcome > 0
@@ -214,7 +216,8 @@ class Game:
     def __init__(self, num_players: int = 4):
         self.round = 0
         self.players = [
-            Player(100, Strategy.AGGRESSIVE if index % 2 == 0 else Strategy.MINIMUM)
+            Player(100, Strategy.AGGRESSIVE if index %
+                   2 == 0 else Strategy.MINIMUM)
             for index in range(num_players)
         ]
         self.min_bet = 1
@@ -236,7 +239,8 @@ class Game:
             self.update()
 
     def shuffle_deck(self):
-        self.deck = [Card(rank, suit) for suit in self.suits for rank in self.ranks]
+        self.deck = [Card(rank, suit)
+                     for suit in self.suits for rank in self.ranks]
         self.deck.append(Card(Rank.JOKER, Suit.SPADES))
         self.deck.append(Card(Rank.JOKER, Suit.DIAMONDS))
         shuffle(self.deck)
@@ -300,11 +304,12 @@ class Game:
             return card
 
         # deal first card
-        card = deal_card()
-        if card is None:
-            return
-
-        hand = (card, None)
+        if first_card is None:
+            card = deal_card()
+            if card is None:
+                return
+            else:
+                hand = (card, None)
 
         # deal second card
         card_two = deal_card()
