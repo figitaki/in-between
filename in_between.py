@@ -109,9 +109,19 @@ class Game:
     players: List[Player]
     suits = [Suit.SPADES, Suit.DIAMONDS, Suit.CLUBS, Suit.HEARTS]
     ranks = [
-        Rank.ACE, Rank.TWO, Rank.THREE, Rank.FOUR, Rank.FIVE, Rank.SIX,
-        Rank.SEVEN, Rank.EIGHT, Rank.NINE, Rank.TEN, Rank.JACK, Rank.QUEEN,
-        Rank.KING
+        Rank.ACE,
+        Rank.TWO,
+        Rank.THREE,
+        Rank.FOUR,
+        Rank.FIVE,
+        Rank.SIX,
+        Rank.SEVEN,
+        Rank.EIGHT,
+        Rank.NINE,
+        Rank.TEN,
+        Rank.JACK,
+        Rank.QUEEN,
+        Rank.KING,
     ]
     deck: List[Card]
     min_bet: int
@@ -119,8 +129,11 @@ class Game:
 
     def __init__(self, num_players: int = 4):
         self.round = 0
-        self.players = [Player(100, Strategy.AGGRESSIVE if index % 2 ==
-                               0 else Strategy.MINIMUM) for index in range(num_players)]
+        self.players = [
+            Player(100, Strategy.AGGRESSIVE if index %
+                   2 == 0 else Strategy.MINIMUM)
+            for index in range(num_players)
+        ]
         self.min_bet = 1
         self.pot = 0
         self.turn = 0
@@ -218,10 +231,10 @@ class Game:
 
             low = min(hand[0].value(), hand[1].value())
             high = max(hand[0].value(), hand[1].value())
-            if in_between.value() > low and in_between.value() < high:
-                # print(f"Player #{self.turn % len(self.players)} wins ${bet}!")
+            in_between_val = in_between.value()
+            if in_between_val == low or in_between_val == high:
+                self.transfer(player, -2 * bet)
+            elif in_between.value() > low and in_between.value() < high:
                 self.transfer(player, bet)
             else:
-                # print(
-                #     f"Player #{self.turn % len(self.players)} lost ${bet}...")
                 self.transfer(player, -bet)
