@@ -38,6 +38,7 @@ class Card:
     enum. A card may also have an ace_high attribute, which is a boolean
     indicating whether the card should be considered an ace high or low.
     """
+
     rank: Rank
     suit: Suit
     ace_high: Optional[bool]
@@ -85,6 +86,7 @@ class Player:
     amount of money they have to bet with. A player also has a strategy, which
     determines how they will play the game.
     """
+
     purse: int
     strategy: Strategy
 
@@ -129,11 +131,10 @@ class Player:
                         outcomes -= 1
                 # range is [-2, 1]
                 normalizedOutcome = outcomes / len(deck)
-                return (
-                    math.floor(user_max_bet * normalizedOutcome)
-                    if normalizedOutcome > 0
-                    else 0
+                bet = math.floor(
+                    user_max_bet * normalizedOutcome if normalizedOutcome > 0 else 0
                 )
+                return bet
             case Strategy.SMART_EXP:
                 outcomes = 0
                 low: int = min(hand[0].value(), hand[1].value())
@@ -146,12 +147,13 @@ class Player:
                     else:
                         outcomes -= 1
                 # range is [-2, 1]
-                normalizedOutcomeExp = (outcomes / len(deck)) ** 0.5
-                return (
-                    math.floor(user_max_bet * normalizedOutcomeExp)
-                    if normalizedOutcomeExp > 0
+                normalizedOutcome = outcomes / len(deck)
+                bet = math.floor(
+                    user_max_bet * (normalizedOutcome**0.5)
+                    if normalizedOutcome > 0
                     else 0
                 )
+                return bet
             case Strategy.USER:
                 bet = input("Enter bet amount: ")
                 if bet == "":
@@ -192,8 +194,7 @@ class Game:
     def __init__(self, num_players: int = 4):
         self.round = 0
         self.players = [
-            Player(100, Strategy.AGGRESSIVE if index %
-                   2 == 0 else Strategy.MINIMUM)
+            Player(100, Strategy.AGGRESSIVE if index % 2 == 0 else Strategy.MINIMUM)
             for index in range(num_players)
         ]
         self.min_bet = 1
@@ -215,8 +216,7 @@ class Game:
             self.update()
 
     def shuffle_deck(self):
-        self.deck = [Card(rank, suit)
-                     for suit in self.suits for rank in self.ranks]
+        self.deck = [Card(rank, suit) for suit in self.suits for rank in self.ranks]
         self.deck.append(Card(Rank.JOKER, Suit.SPADES))
         self.deck.append(Card(Rank.JOKER, Suit.DIAMONDS))
         shuffle(self.deck)
