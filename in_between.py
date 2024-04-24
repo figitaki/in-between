@@ -107,8 +107,8 @@ class Player:
                 return user_max_bet * (spread // 14) if spread > 6 else 0
             case Strategy.SMART_LIN:
                 outcomes = 0
-                low = min(hand[0].value())
-                high = max(hand[1].value())
+                low: int = min(hand[0].value(), hand[1].value())
+                high: int = max(hand[1].value(), hand[0].value())
                 for card in deck:
                     if card.value() == low or card.value() == high:
                         outcomes -= 2
@@ -125,8 +125,8 @@ class Player:
                 )
             case Strategy.SMART_EXP:
                 outcomes = 0
-                low = min(hand[0].value())
-                high = max(hand[1].value())
+                low: int = min(hand[0].value(), hand[1].value())
+                high: int = max(hand[1].value(), hand[0].value())
                 for card in deck:
                     if card.value() == low or card.value() == high:
                         outcomes -= 2
