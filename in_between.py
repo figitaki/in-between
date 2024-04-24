@@ -32,6 +32,12 @@ class Rank(Enum):
 
 
 class Card:
+    """
+    Representation of a playing card. A card has a rank and a suit. The rank
+    is an instance of the Rank enum, and the suit is an instance of the Suit
+    enum. A card may also have an ace_high attribute, which is a boolean
+    indicating whether the card should be considered an ace high or low.
+    """
     rank: Rank
     suit: Suit
     ace_high: Optional[bool]
@@ -74,6 +80,11 @@ class Strategy(Enum):
 
 
 class Player:
+    """
+    Representation of a player in the game. A player has a purse, which is the
+    amount of money they have to bet with. A player also has a strategy, which
+    determines how they will play the game.
+    """
     purse: int
     strategy: Strategy
 
@@ -181,7 +192,8 @@ class Game:
     def __init__(self, num_players: int = 4):
         self.round = 0
         self.players = [
-            Player(100, Strategy.AGGRESSIVE if index % 2 == 0 else Strategy.MINIMUM)
+            Player(100, Strategy.AGGRESSIVE if index %
+                   2 == 0 else Strategy.MINIMUM)
             for index in range(num_players)
         ]
         self.min_bet = 1
@@ -203,7 +215,8 @@ class Game:
             self.update()
 
     def shuffle_deck(self):
-        self.deck = [Card(rank, suit) for suit in self.suits for rank in self.ranks]
+        self.deck = [Card(rank, suit)
+                     for suit in self.suits for rank in self.ranks]
         self.deck.append(Card(Rank.JOKER, Suit.SPADES))
         self.deck.append(Card(Rank.JOKER, Suit.DIAMONDS))
         shuffle(self.deck)
@@ -245,7 +258,8 @@ class Game:
                 # print("Deck is empty! Shuffling...")
                 self.shuffle_deck()
             card = self.deck.pop()
-            print(f"Dealt: {card}")
+            # print(f"Dealt: {card}")
+
             if card.rank == Rank.JOKER:
                 # player loses automatically, pays min_bet
                 self.transfer(player, -self.min_bet)
