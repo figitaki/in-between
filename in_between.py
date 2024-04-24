@@ -130,7 +130,7 @@ class Player:
                     else:
                         outcomes -= 1
                 # range is [-2, 1]
-                normalizedOutcome = outcomes / len(deck)
+                normalizedOutcome = outcomes / len(deck) if len(deck) > 0 else 0
                 bet = math.floor(
                     user_max_bet * normalizedOutcome if normalizedOutcome > 0 else 0
                 )
@@ -147,7 +147,7 @@ class Player:
                     else:
                         outcomes -= 1
                 # range is [-2, 1]
-                normalizedOutcome = outcomes / len(deck)
+                normalizedOutcome = outcomes / len(deck) if len(deck) > 0 else 0
                 bet = math.floor(
                     user_max_bet * (normalizedOutcome**0.5)
                     if normalizedOutcome > 0
