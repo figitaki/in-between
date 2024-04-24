@@ -206,7 +206,7 @@ class Game:
                 card = deal_card()
                 return card
             elif card.rank == Rank.ACE:
-                card.ace_high = player.decide_ace_high(self.hand)
+                card.ace_high = player.decide_ace_high(hand)
             return card
 
         # deal first card
